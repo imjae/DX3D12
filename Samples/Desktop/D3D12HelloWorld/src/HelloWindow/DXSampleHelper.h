@@ -1,4 +1,4 @@
-//*********************************************************
+﻿//*********************************************************
 //
 // Copyright (c) Microsoft. All rights reserved.
 // This code is licensed under the MIT License (MIT).
@@ -6,6 +6,11 @@
 // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
 // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
 // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+// 저작권 (c) Microsoft. 모든 권리는 Microsoft에 있다.
+// 이 코드는 MIT 라이선스(MIT)에 따라 제공된다.
+// 이 코드는 *있는 그대로* 제공되며, 특정 목적에의 적합성, 상품성 또는 비침해에 대한
+// 묵시적 보증을 포함하여 어떠한 명시적 또는 묵시적 보증도 제공하지 않는다.
 //
 //*********************************************************
 
@@ -16,6 +21,9 @@
 // it has no understanding of the lifetime of resources on the GPU. Apps must account
 // for the GPU lifetime of resources to avoid destroying objects that may still be
 // referenced by the GPU.
+//
+// ComPtr는 CPU에서 리소스의 수명을 관리하지만 GPU에서의 리소스 수명은 추적하지 않는다.
+// 앱은 GPU가 아직 참조할 수 있는 객체를 파괴하지 않도록 GPU에서의 리소스 수명도 관리해야 한다.
 using Microsoft::WRL::ComPtr;
 
 inline std::string HrToString(HRESULT hr)
@@ -54,7 +62,7 @@ inline void GetAssetsPath(_Out_writes_(pathSize) WCHAR* path, UINT pathSize)
     DWORD size = GetModuleFileName(nullptr, path, pathSize);
     if (size == 0 || size == pathSize)
     {
-        // Method failed or path was truncated.
+        // Method failed or path was truncated. | 메서드가 실패했거나 경로가 잘렸다.
         throw std::exception();
     }
 
@@ -116,7 +124,7 @@ inline HRESULT ReadDataFromDDSFile(LPCWSTR filename, byte** data, UINT* offset, 
         return E_FAIL;
     }
 
-    // DDS files always start with the same magic number.
+    // DDS files always start with the same magic number. | DDS 파일은 항상 동일한 매직 넘버로 시작한다.
     static const UINT DDS_MAGIC = 0x20534444;
     UINT magicNumber = *reinterpret_cast<const UINT*>(*data);
     if (magicNumber != DDS_MAGIC)
@@ -167,7 +175,7 @@ inline HRESULT ReadDataFromDDSFile(LPCWSTR filename, byte** data, UINT* offset, 
     return S_OK;
 }
 
-// Assign a name to the object to aid with debugging.
+// Assign a name to the object to aid with debugging. | 디버깅할 때 식별하기 쉽도록 객체에 이름을 지정한다.
 #if defined(_DEBUG) || defined(DBG)
 inline void SetName(ID3D12Object* pObject, LPCWSTR name)
 {
@@ -190,15 +198,15 @@ inline void SetNameIndexed(ID3D12Object*, LPCWSTR, UINT)
 }
 #endif
 
-// Naming helper for ComPtr<T>.
-// Assigns the name of the variable as the name of the object.
-// The indexed variant will include the index in the name of the object.
+// Naming helper for ComPtr<T>. | ComPtr<T>에 이름을 지정하는 헬퍼.
+// Assigns the name of the variable as the name of the object. | 변수 이름을 객체의 이름으로 지정한다.
+// The indexed variant will include the index in the name of the object. | 인덱스를 받는 버전은 객체 이름에 인덱스를 포함한다.
 #define NAME_D3D12_OBJECT(x) SetName((x).Get(), L#x)
 #define NAME_D3D12_OBJECT_INDEXED(x, n) SetNameIndexed((x)[n].Get(), L#x, n)
 
 inline UINT CalculateConstantBufferByteSize(UINT byteSize)
 {
-    // Constant buffer size is required to be aligned.
+    // Constant buffer size is required to be aligned. | 상수 버퍼 크기는 정렬 요건을 충족해야 한다.
     return (byteSize + (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1)) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
 }
 
@@ -231,7 +239,7 @@ inline Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(
 }
 #endif
 
-// Resets all elements in a ComPtr array.
+// Resets all elements in a ComPtr array. | ComPtr 배열의 모든 요소를 재설정한다.
 template<class T>
 void ResetComPtrArray(T* comPtrArray)
 {
@@ -242,7 +250,7 @@ void ResetComPtrArray(T* comPtrArray)
 }
 
 
-// Resets all elements in a unique_ptr array.
+// Resets all elements in a unique_ptr array. | unique_ptr 배열의 모든 요소를 재설정한다.
 template<class T>
 void ResetUniquePtrArray(T* uniquePtrArray)
 {
